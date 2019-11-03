@@ -1,0 +1,149 @@
+<!--
+ * @Author: your name
+ * @Date: 2019-10-22 17:56:35
+ * @LastEditTime: 2019-11-03 18:58:17
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \测试\index4.html
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .wrap {
+            width: 80%;
+            overflow: hidden;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+
+        }
+
+        .wrap .col {
+            width: 25%;
+            float: left;
+        }
+
+        .wrap .col .box {
+            padding: 10px;
+            margin: 5px
+        }
+
+
+        .wrap .col .box img {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <title>Document</title>
+</head>
+
+<body>
+    <ul class="wrap">
+        <li class="col">
+           
+        </li>
+        <li class="col">
+            
+        </li>
+        <li class="col">
+           
+        </li>
+        <li class="col">
+          
+        </li>
+    </ul>
+
+
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <script src="ajax.js"></script>
+    <script>
+        /*瀑布流精髓：
+         1、img 图片会自动填充剩余的区域
+         2、查询来的图图片填充到最短的一列
+         */
+
+        function readDom(data) {
+
+            if (data && data.length) {
+                // var colWidth= $('.col:eq(0)').outerWidth();
+                for (var i = 0; i < data.length; i++) {
+                    var imgWrap = $(`<div class="box"></div>`);
+
+                    var img = new Image();
+                    img.src = data[i].image;
+                    // var imgwidth = colWidth *  colWidth.outerHeight /  colWidth.outerHeight;
+                    // img.height =imgwidth;
+
+                    var p = $(`<p>` + data[i].title + `</p>`)
+                    imgWrap.append(img);
+                    imgWrap.append(p);
+
+                    (function (imgWrap) {
+                        img.onload = function () {
+                            $('.col').eq([getminCol().index]).append(imgWrap);
+                        }
+                    }(imgWrap))
+
+
+                }
+            }
+        }
+
+
+
+        function getminCol() {
+            var oLi = $('.col');
+            var minIdex = 0;
+            var minHeight = $(oLi[0]).outerHeight();
+            for (var i = 0; i < oLi.length; i++) {
+                if ($(oLi[i]).outerHeight() < minHeight) {
+                    minHeight = $(oLi[i]).outerHeight();
+                    minIdex = i;
+                }
+            }
+            return {
+                index: minIdex,
+                height: minHeight,
+            }
+        }
+
+        function triggerRead() {
+            ajax('GET', 'image.json', "", function (data) {
+                readDom(data)
+                lock =false;
+            })
+        }
+
+
+        triggerRead()
+        var lock = false;
+        window.onscroll = function () {
+            var minHeight = getminCol().height;
+            var scrollTop = document.documentElement.scrollTop;
+            var windowHeight = window.innerHeight;
+
+            if (minHeight < windowHeight + scrollTop) {
+                if (!lock) {
+                    lock = true;
+                    triggerRead()
+                }
+
+            }
+        }
+
+
+
+    </script>
+</body>
+
+</html>
